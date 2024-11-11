@@ -1,0 +1,48 @@
+#lang ivy1.7
+
+# tutorial titled "invariants" at
+# https://kenmcmil.github.io/ivy/examples/client_server_example.html
+
+# inductive invariant properties: initiation ∧ consecution
+
+type client
+type server
+
+relation link(X:client, Y:server)
+relation semaphore(X:server)
+
+after init {
+    semaphore(W) := true;
+    link(X,Y) := false
+}
+
+action connect(x:client, y:server) = {
+    require [sAvail] semaphore(y);
+    link(x, y) := true;
+    semaphore(y) := false
+}
+
+action disconnect(x:client, y:server) = {
+    require [linked] link(x, y);
+    link(x, y) := false;
+    semaphore(y) := true
+}
+
+# export essentially means that these can be called in
+# arbitrary sequence
+export connect
+export disconnect
+
+# this whole program is so far only an abstract model,
+# not an implementation
+
+# never are there clients a and b both connected to the same server
+invariant [atMostOne] ~(Ca ~= Cb & link(Ca, S) & link(Cb, S))
+
+# private block for a "conjectured" invariant? [ok, this is a source-level
+# documentation feature to tell readers that this is uninteresting and only
+# in support of the desired invariant
+private {
+    # never is there a client connected to a server with its semaphore true
+    invariant ~(link(C,S) & semaphore(S))
+}
