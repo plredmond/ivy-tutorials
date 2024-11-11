@@ -1,0 +1,19 @@
+#lang ivy1.7
+
+module set(elem) = {
+    type this
+    alias t = this
+
+    relation contains(X:t, Y:elem) # "representation function" ?
+    action emptyset returns(s:t)
+    action add(s:t, e:elem) returns (s:t)
+
+    object spec = {
+        after emptyset {
+            assert ~contains(s, X)
+        }
+        after add {
+            assert contains(s, X) <-> (contains(old s, X) | X = e)
+        }
+    }
+}
