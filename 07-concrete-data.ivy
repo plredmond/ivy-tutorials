@@ -45,6 +45,10 @@ action tabulate(max: t) returns (res: arr.t) = {
         }
     }
 }
+#> This program seems inefficient, since it copies the array
+#> each time it modifies one element. In fact it isn’t. The
+#> compiler recognizes that the array can be modified “in
+#> place”.
 
 interpret t -> int
 export tabulate
