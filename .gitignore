@@ -1,0 +1,5 @@
+array1
+*.h
+*.cpp
+*.dSYM/
+*.dsc
