@@ -32,24 +32,29 @@ module eg1 = {
     }
 }
 
-include collections
-type t
-instance arr : array(t, t)
-action tabulate(max: t) returns (res: arr.t) = {
-    local i:t {
-        i := 0;
-        res := arr.create(max, 0);
-        while i < max {
-            res := arr.set(res, i, i*i);
-            i := i + 1
+module array1mod = {
+    include collections
+    type t
+    instance arr : array(t, t)
+    action tabulate(max: t) returns (res: arr.t) = {
+        local i:t {
+            i := 0;
+            res := arr.create(max, 0);
+            while i < max {
+                res := arr.set(res, i, i*i);
+                i := i + 1
+            }
         }
     }
+    # Quoting the tutorial:
+    #     This program seems inefficient, since it copies the
+    #     array each time it modifies one element. In fact it
+    #     isn’t. The compiler recognizes that the array can
+    #     be modified “in place”.
+    interpret t -> int
+    export tabulate
+    extract iso_impl = tabulate, arr
 }
-#> This program seems inefficient, since it copies the array
-#> each time it modifies one element. In fact it isn’t. The
-#> compiler recognizes that the array can be modified “in
-#> place”.
-
-interpret t -> int
-export tabulate
-extract iso_impl = tabulate, arr
+instance array1 : array1mod
+# > array1.tabulate(4)
+# = [0,1,4,9]
