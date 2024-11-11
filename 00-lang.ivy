@@ -1,0 +1,96 @@
+#lang ivy1.7
+
+type node
+# node is an uninterpreted type
+
+relation link(A:node, B:node)
+# link is a relations on pairs of node
+
+function link2(A:node, B:node) : bool
+# link2 is the same as link
+
+individual root:node
+# root is a single node
+
+type color = {red, green, blue}
+# color is a type with three individuals
+
+action connect(a:node, b:node) = {
+    link(a, b) := true
+}
+# connect is a procedure which may mutate state (here, the definition of link)
+#
+# assignment is an ivy primitive; here the definition of link is modified to
+# include a true value for the given pair
+
+action clear(a:node) = {
+    link(a, ANYTHING) := false
+}
+# clear removes all links from the given node; ANYTHING is a place-holder
+
+action clear_failed(a:node) = {
+    link(a, B) := link(a, B) & ~failed(B)
+}
+# clear failed removes links from the given node to all nodes in the "failed"
+# set; i guess this works just because "link(a, B) & ~failed(B)" is a bool
+
+action flip = {
+    bit := ~bit
+}
+# parentheses aren't necessary for a procedure without params
+
+action swap(a:t, b:t) returns (c:t, d:t) = {
+    c := b;
+    d := a
+}
+# a procedure may have "return parameters"
+
+action connect_unique(x:node, y:node) = {
+    link(x, Y) := false;
+    link(x, y) = true
+}
+# semicolon sequences actions
+
+# `link(x, Y) := Y = y` is the same as the above (??? somehow?!)
+
+action connect_unique2(x:node, y:node) = {
+    call clear(a);
+    call connect(a, b)
+}
+# connect_unique2 is the same as connect_unique
+
+# CALL BY VALUE -- values in a function scope are copies
+
+# Obtain result of an action:
+#
+#   call x, y := swap(y, x)
+#
+# or, for a single result, an expression is okay, e.g. were sqrt an action:
+#
+#   x := y + sqrt(z)
+#
+# is the same as
+#
+#   call temp := sqrt(z);
+#   x := y + temp
+
+# CALLS WITHIN A CONDITIONAL BRANCH ARE HOISTED OUT (!!!???)
+#
+#   x := sqrt(y) if c else z
+#
+# is the same as
+#
+#   call temp := sqrt(y);
+#   x := temp if c else z
+#
+# OOF for side effects
+
+action next returns (val:t) = {
+    current := current + 1;
+    val := current
+}
+# procedure w/o args is called w/o parens as in
+#
+#   x := y + next
+
+# Much more...
