@@ -10,6 +10,7 @@ module set(elem) = {
     relation contains(X:t, Y:elem) # "representation function" ?
     action emptyset returns(s:t)
     action add(s:t, e:elem) returns (s:t)
+    action remove(s:t, e:elem) returns (s:t)
     # using s for both input and output indicates to compiler to update in place
 
     object spec = {
@@ -18,6 +19,9 @@ module set(elem) = {
         }
         after add {
             assert contains(s, X) <-> (contains(old s, X) | X = e)
+        }
+        after remove {
+            assert contains(s, X) <-> (contains(old s, X) & X ~= e)
         }
     }
 
@@ -32,8 +36,7 @@ module set(elem) = {
 
         definition contains(X:t, y:elem) =
             exists Z.
-                0 <= Z
-                & Z < repr(X).end
+                0 <= Z & Z < repr(X).end
                 & repr(X).value(Z) = y
 
         implement emptyset {
@@ -43,6 +46,16 @@ module set(elem) = {
         implement add {
             if ~contains(s, e) {
                 repr(s) := arr.resize(repr(s), index.next(arr.end(repr(s))), e)
+            }
+        }
+
+        implement remove {
+            if some (i:index.t)
+                    0 <= i & i < repr(s).end
+                    & repr(s).value(i) = e {
+                var last := repr(s).end.prev;
+                repr(s) := repr(s).set(i, repr(s).get(last));
+                repr(s) := repr(s).resize(last, 0);
             }
         }
     }
