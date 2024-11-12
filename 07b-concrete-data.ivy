@@ -1,5 +1,8 @@
 #lang ivy1.7
 
+include collections
+include order
+
 module set(elem) = {
     type this
     alias t = this
@@ -7,6 +10,7 @@ module set(elem) = {
     relation contains(X:t, Y:elem) # "representation function" ?
     action emptyset returns(s:t)
     action add(s:t, e:elem) returns (s:t)
+    # using s for both input and output indicates to compiler to update in place
 
     object spec = {
         after emptyset {
@@ -16,4 +20,29 @@ module set(elem) = {
             assert contains(s, X) <-> (contains(old s, X) | X = e)
         }
     }
+
+    instance index : unbounded_sequence
+    instance arr : array(index.t, elem)
+
+    # "destructor" in the sense that it takes the abstract type `t` (a.k.a.
+    # `this`) to its representation `arr`
+    destructor repr(X:t) : arr
+
+    definition contains(X:t, y:elem) =
+        exists Z.
+            0 <= Z
+            & Z < repr(X).end
+            & repr(X).value(Z) = y
+
+    implement emptyset {
+        repr(s) := arr.create(0, 0)
+    }
+
+    implement add {
+        if ~contains(s, e) {
+            repr(s) := arr.resize(repr(s), index.next(arr.end(repr(s))), e)
+        }
+    }
+
+    isolate iso = this
 }
