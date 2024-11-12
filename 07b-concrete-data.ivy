@@ -46,3 +46,8 @@ module set(elem) = {
 
     isolate iso = this
 }
+
+type elem
+instance s : set(elem)
+export s.emptyset
+export s.add
