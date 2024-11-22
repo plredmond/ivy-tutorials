@@ -1,1 +1,26 @@
 #lang ivy1.7
+
+type packet
+
+object intf = {
+    action send(x : packet)
+    action recv(x : packet)
+}
+
+specification {
+    # monitor or "ghost" state (and code); "describes a channel which can
+    # reorder and duplicate packets but not corrupt [invent] packets"
+    relation sent(X : packet)
+
+    after init {
+        sent(X) := false;
+    }
+
+    before intf.send {
+        sent(x) := true;
+    }
+
+    before intf.recv {
+        require sent(x);
+    }
+}
