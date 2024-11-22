@@ -26,11 +26,31 @@ specification {
 }
 
 implementation {
-    # trivial implementation satisfying spec
-    implement intf.send {
-        call intf.recv(x)
+    # one-place buffer
+    individual full : bool
+    individual contents : packet
+
+    after init {
+        full := false;
     }
+
+    implement intf.send {
+        full := true;
+        contents := x;
+    }
+
+    action async = {
+        if full {
+            full := false;
+            call intf.recv(contents);
+            contents := *;
+        }
+    }
+
+    # relates implementation vars to specification monitor?
+    invariant full -> sent(contents)
 }
 
 import intf.recv # the environment will implement intf.recv
 export intf.send # the environment will call intf.send
+export async
