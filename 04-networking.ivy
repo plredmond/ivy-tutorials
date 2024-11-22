@@ -1,0 +1,15 @@
+#lang ivy1.7
+
+type addr
+type pkt
+
+include udp
+instance net : udp_simple(addr, pkt)
+
+import net.recv
+export net.send
+
+interpret addr->bv[8]
+interpret pkt->bv[32]
+
+extract iso_impl = net.impl
