@@ -12,4 +12,4 @@ export net.send
 interpret addr->bv[8]
 interpret pkt->bv[32]
 
-extract iso_impl = net.impl
+extract iso_impl(me : addr) = net.impl(me)
