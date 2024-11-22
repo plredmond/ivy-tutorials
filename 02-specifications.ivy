@@ -24,3 +24,13 @@ specification {
         require sent(x);
     }
 }
+
+implementation {
+    # trivial implementation satisfying spec
+    implement intf.send {
+        call intf.recv(x)
+    }
+}
+
+import intf.recv # the environment will implement intf.recv
+export intf.send # the environment will call intf.send
